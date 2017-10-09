@@ -6,28 +6,28 @@ using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace Schedule.Models
 {
-    // You can add profile data for the user by adding more properties to your ApplicationUser class, please visit https://go.microsoft.com/fwlink/?LinkID=317594 to learn more.
-    public class ApplicationUser : IdentityUser
+    public class SheduleDbContext : IdentityDbContext
     {
-        public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<ApplicationUser> manager)
-        {
-            // Note the authenticationType must match the one defined in CookieAuthenticationOptions.AuthenticationType
-            var userIdentity = await manager.CreateIdentityAsync(this, DefaultAuthenticationTypes.ApplicationCookie);
-            // Add custom user claims here
-            return userIdentity;
-        }
-    }
-
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
-    {
-        public ApplicationDbContext()
-            : base("DefaultConnection", throwIfV1Schema: false)
+        public SheduleDbContext()
+            : base("DefaultConnection")
         {
         }
 
-        public static ApplicationDbContext Create()
+        public static SheduleDbContext Create()
         {
-            return new ApplicationDbContext();
+            return new SheduleDbContext();
         }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {            base.OnModelCreating(modelBuilder);        }
+
+        public DbSet<Event> Events { get; set; }
+        public DbSet<EventType> EventTypes { get; set; }
+        public DbSet<Group> Group { get; set; }
+        public DbSet<GroupRole> GroupRoles { get; set; }
+        public DbSet<Invitation> Invitations { get; set; }
+        public DbSet<Membership> Memberships { get; set; }
+        public DbSet<Request> Requests { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }
