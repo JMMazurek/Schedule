@@ -1,0 +1,149 @@
+﻿@model Schedule.Models.Views.EventsIndexViewModel
+
+
+<h2 style="text-align:center;">@Model.Month.ToString("MMMM yyyy")</h2>
+
+@{bool personal = !Model.GroupId.HasValue; }
+
+@Html.ActionLink("<", personal ? "Index" : "GroupEvents", personal ? "MySchedule" : "Groups", new { group = Model.GroupId, month = Model.PreviousMonth.Month, year = Model.PreviousMonth.Year},
+                    new { @class = "btn btn-default pull-left" })
+
+@Html.ActionLink(">", personal ? "Index" : "GroupEvents", personal ? "MySchedule" : "Groups", new { group = Model.GroupId, month = Model.NextMonth.Month, year = Model.NextMonth.Year },
+                    new { @class = "btn btn-default pull-right" })
+<br />
+<br />
+<p>
+    @Html.ActionLink("Create New", "Create")
+</p>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            @foreach (var item in Model.Weeks[0])
+            {
+                <th width="14.28%">@item.Date.ToString("dddd")</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var week in Model.Weeks)
+        {
+            <tr>
+                @foreach (var day in week)
+                {
+                    <td>
+                        <a  role="button" class="btn btn-default popper" data-toggle="popover" style="width:100%;height:100%;" data-placement="bottom">
+                           @day.Date.Day
+                            @if (day.Events.Count > 0)
+                            {
+                                <br />
+                                <span class="badge">@day.Events.Count</span>
+                            }
+                        </a>
+                        <div class="popper-content hide">
+                            @if(day.Events.Count > 0)
+                            {
+                            <table class="table table-sm">
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Events[0].Starts)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Events[0].Ends)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Events[0].Name)
+                                    </th>
+                                </tr>
+                                @foreach (var e in day.Events)
+                                {
+                                    <tr>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => e.Starts)
+                                        </td>
+                                        <td>
+                                            @Html.DisplayFor(modelItem => e.Ends)
+                                        </td>
+                                        <td>
+                                            @Html.ActionLink(e.Name, "Details", new { id = e.Id })
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                            }
+                            @Html.ActionLink("Create New", "Create", new { day = day.Date.Day, month = day.Date.Month, year = day.Date.Year, group = Model.GroupId})
+                        </div>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    $(function(){
+        $('.popper').popover({
+            container: 'body',
+            html: true,
+            trigger: 'click',
+            content: function () {
+                return $(this).next('.popper-content').html();
+            }
+        });
+        $('.popper').on('click', function (e) {
+            $('.popper').not(this).popover('hide');
+        });
+});
+</script>
+
+<table class="table">
+    <tr>
+        @if(personal)
+        {
+            <th>
+                @Html.DisplayNameFor(model => model.Events[0].Group.Name)
+            </th>
+        }
+        <th>
+            @Html.DisplayNameFor(model => model.Events[0].Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Events[0].Starts)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Events[0].Ends)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Events[0].Description)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model.Events) {
+    <tr>
+        @if (personal)
+        {
+            <td>
+                @Html.DisplayFor(modelItem => item.Group.Name)
+            </td>
+        }
+        <td>
+            @Html.DisplayFor(modelItem => item.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Starts)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Ends)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Description)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
+            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
+            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+        </td>
+    </tr>
+}
+</table>

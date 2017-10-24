@@ -1,0 +1,9 @@
+﻿@model Schedule.Models.Views.GroupsGroupEventsModel
+
+@{
+    ViewBag.Title = "GroupEvents";
+}
+
+<h2>Group Events - @Model.Group.Name</h2>
+
+@{Html.RenderAction("Index", "Events", new { month = Model.Month.Month, year = Model.Month.Year, group = Model.Group.Id });}

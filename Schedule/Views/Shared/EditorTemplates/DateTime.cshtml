@@ -1,0 +1,3 @@
+﻿@model DateTime?
+
+@Html.TextBox("", Model.HasValue ? Model.Value.ToString() : string.Empty, new { @class = "form-control text-box single-line datepicker" })

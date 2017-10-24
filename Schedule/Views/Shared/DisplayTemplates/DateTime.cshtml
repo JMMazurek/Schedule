@@ -1,0 +1,6 @@
+﻿@model DateTime?
+
+@if (Model.HasValue)
+{
+    <span>@Model.Value.ToString("g")</span>
+}

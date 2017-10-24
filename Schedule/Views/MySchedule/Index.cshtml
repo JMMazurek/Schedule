@@ -1,0 +1,10 @@
+﻿@model Schedule.Models.Views.MyScheduleIndexViewModel
+
+@{
+    ViewBag.Title = "Index";
+}
+
+
+<h2>My Schedule</h2>
+
+@{Html.RenderAction("Index", "Events", new { month = Model.Month.Month, year = Model.Month.Year});}

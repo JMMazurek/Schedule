@@ -1,0 +1,62 @@
+﻿@model IEnumerable<Schedule.Models.Notification>
+
+@{
+    ViewBag.Title = "Notifications";
+}
+
+<h2>Notifications</h2>
+
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.User.Email)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Decription)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Date)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model)
+{
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.User.Email)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Decription)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Date)
+        </td>
+        <td>
+            @if(!item.Seen)
+            {
+                using(Html.BeginForm("MarkNotificationAsSeen", "MySchedule", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-actions no-color">
+                        @Html.Hidden("id", item.Id)
+                        <input type="submit" value="Mark as seen" class="btn btn-default" /> |
+                    </div>
+                 }
+             }
+            @using (Html.BeginForm("DeleteNotification", "MySchedule", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-actions no-color">
+                    @Html.Hidden("id", item.Id)
+                    <input type="submit" value="Delete" class="btn btn-default" />
+                </div>
+            }
+        </td>
+    </tr>
+}
+
+</table>

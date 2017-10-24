@@ -1,0 +1,114 @@
+﻿@model Schedule.Models.Views.GroupsRequestsAndInvitationsViewModel
+
+@{
+    ViewBag.Title = "Requests And Invitations";
+}
+
+<br />
+
+@Html.ActionLink("Find user to invite", "FindUser", "Groups", new { groupId = Model.GroupId}, null)
+
+<h2>Requests</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Requests[0].RequestingUser.UserName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Requests[0].Date)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Requests[0].Status)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model.Requests)
+{
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.RequestingUser.UserName)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Date)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Status)
+        </td>
+        <td>
+            @using (Html.BeginForm("AcceptRequest", "Groups", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-actions no-color">
+                    @Html.Hidden("id", item.Id)
+                    <input type="submit" value="Accept" class="btn btn-default" />
+                </div>
+            }
+            @using (Html.BeginForm("RejectRequest", "Groups", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-actions no-color">
+                    @Html.Hidden("id", item.Id)
+                    <input type="submit" value="Reject" class="btn btn-default" />
+                </div>
+            }
+        </td>
+    </tr>
+}
+
+</table>
+
+
+<h2>Invitations</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Invitations[0].InvitedUser.UserName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Invitations[0].Date)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Invitations[0].Status)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Invitations[0].InvitingUser.UserName)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model.Invitations)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.InvitedUser.UserName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Date)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.InvitingUser.UserName)
+            </td>
+            <td>
+                @using (Html.BeginForm("CancelInvitation", "Gropus", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-actions no-color">
+                        @Html.Hidden("id", item.Id)
+                        <input type="submit" value="Cancel" class="btn btn-default" />
+                    </div>
+                }
+            </td>
+        </tr>
+    }
+
+</table>
+

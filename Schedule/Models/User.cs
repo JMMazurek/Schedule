@@ -15,17 +15,17 @@ namespace Schedule.Models
         public User()
         {
             Events = new HashSet<Event>();
-            EventTypes = new HashSet<EventType>();
             Requests = new HashSet<Request>();
             Invitations = new HashSet<Invitation>();
             Memberships = new HashSet<Membership>();
+            Notifications = new HashSet<Notification>();
         }
 
         public virtual ICollection<Event> Events { get; private set; }
-        public virtual ICollection<EventType> EventTypes { get; private set; }
         public virtual ICollection<Request> Requests { get; private set; }
         public virtual ICollection<Invitation> Invitations { get; private set; }
         public virtual ICollection<Membership> Memberships { get; private set; }
+        public virtual ICollection<Notification> Notifications { get; private set; }
 
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(UserManager<User> manager)
         {

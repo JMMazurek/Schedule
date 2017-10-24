@@ -6,6 +6,7 @@
     <title>@ViewBag.Title - My ASP.NET Application</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
 
 </head>
 <body>
@@ -17,11 +18,48 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                @Html.ActionLink("Schedule", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                My Shedule
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("My events", "Index", "MySchedule")</li>
+                                <li>@Html.ActionLink("Notifications", "Notifications", "MySchedule")</li>
+                                <li>@Html.ActionLink("Requests and invitations", "RequestsAndInvitations", "MySchedule")</li>
+                            </ul>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                Groups
+                                <span class="caret"></span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li>@Html.ActionLink("My groups", "Index", "Groups")</li>
+                                <li>@Html.ActionLink("Find group", "FindGroup", "Groups")</li>
+                            </ul>
+                        </li>
+                        if(ViewBag.groupId != null)
+                        {
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                    Group
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li>@Html.ActionLink("Group events", "GroupEvents", "Groups", new { group = ViewBag.groupId }, null)</li>
+                                    <li>@Html.ActionLink("Details", "Details", "Groups", new { id = ViewBag.groupId }, null)</li>
+                                    <li>@Html.ActionLink("Requests and invitations", "RequestsAndInvitations", "Groups", new { group = ViewBag.groupId }, null)</li>
+                                </ul>
+                            </li>
+                        }
+                    }
                     <li>@Html.ActionLink("About", "About", "Home")</li>
                     <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
                 </ul>
@@ -36,8 +74,13 @@
             <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
         </footer>
     </div>
+    <script type="text/javascript">
+            $(function () {
+                $('.datepicker').datetimepicker();
+            });
+    </script>
 
-    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/moment")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
 </body>

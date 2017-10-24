@@ -1,0 +1,141 @@
+﻿@model Schedule.Models.Views.MyScheduleRequestsAndInvitationsViewModel
+
+@{
+    ViewBag.Title = "Requests And Invitations";
+}
+
+
+<h2>Requests</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Requests[0].Group.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Requests[0].Date)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Requests[0].Status)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Requests[0].AcceptingUser.UserName)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model.Requests)
+{
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Group.Name)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Date)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Status)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.AcceptingUser.UserName)
+        </td>
+        <td>
+            @if(item.Status == "Waiting")
+            {
+                using(Html.BeginForm("CancelRequest", "MySchedule", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-actions no-color">
+                        @Html.Hidden("id", item.Id)
+                        <input type="submit" value="Cancel" class="btn btn-default" />
+                    </div>
+                }
+            }
+            @using(Html.BeginForm("DeleteRequest", "MySchedule", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-actions no-color">
+                    @Html.Hidden("id", item.Id)
+                    <input type="submit" value="Delete" class="btn btn-default" />
+                </div>
+            }
+        </td>
+    </tr>
+}
+
+</table>
+
+
+<h2>Invitations</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Invitations[0].Group.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Invitations[0].Date)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Invitations[0].Status)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Invitations[0].InvitingUser.UserName)
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model.Invitations)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Group.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Date)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.InvitingUser.UserName)
+            </td>
+            <td>
+                @if (item.Status == "Waiting")
+                {
+                    using(Html.BeginForm("AcceptInvitation", "MySchedule", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <div class="form-actions no-color">
+                            @Html.Hidden("id", item.Id)
+                            <input type="submit" value="Accept" class="btn btn-default" />
+                        </div>
+                    }
+                    using(Html.BeginForm("RejectInvitation", "MySchedule", FormMethod.Post))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <div class="form-actions no-color">
+                            @Html.Hidden("id", item.Id)
+                            <input type="submit" value="Reject" class="btn btn-default" />
+                        </div>
+                    }
+                }
+                @using(Html.BeginForm("DeleteInvitation", "MySchedule", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-actions no-color">
+                        @Html.Hidden("id", item.Id)
+                        <input type="submit" value="Delete" class="btn btn-default" />
+                    </div>
+                }
+            </td>
+        </tr>
+    }
+
+</table>
+
