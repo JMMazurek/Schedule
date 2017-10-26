@@ -25,6 +25,7 @@ namespace Schedule.Models
         public bool Public { get; set; }
         [Required]
         [MaxLength(50)]
+        [Display(Name = "Group name")]
         public string Name { get; set; }
         [MaxLength(300)]
         public string Description { get; set; }

@@ -26,6 +26,38 @@ namespace Schedule.Migrations
             //      new Person { FullName = "Rowan Miller" }
             //    );
             //
+            SeedGroupRoles(context);
+        }
+
+        private void SeedGroupRoles(Schedule.Models.SheduleDbContext context)
+        {
+            context.GroupRoles.AddOrUpdate(
+                gr => gr.Name,
+                new Models.GroupRole
+                {
+                    Name = "User",
+                    CanManageGroup = false,
+                    CanManageUsers = false,
+                    CanManageUsersEvents = false,
+                    CanManageUsersRoles = false
+                },
+                new Models.GroupRole
+                {
+                    Name = "Moderator",
+                    CanManageGroup = false,
+                    CanManageUsers = false,
+                    CanManageUsersEvents = true,
+                    CanManageUsersRoles = false
+                },
+                new Models.GroupRole
+                {
+                    Name = "Administrator",
+                    CanManageGroup = true,
+                    CanManageUsers = true,
+                    CanManageUsersEvents = true,
+                    CanManageUsersRoles = true
+                }
+                );
         }
     }
 }

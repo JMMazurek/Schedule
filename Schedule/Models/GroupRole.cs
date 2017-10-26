@@ -17,7 +17,14 @@ namespace Schedule.Models
         [Required]
         [MaxLength(50)]
         public string Name { get; set; }
+        [Required]
+        public bool CanManageUsers { get; set; }
+        [Required]
+        public bool CanManageUsersEvents { get; set; }
+        [Required]
+        public bool CanManageGroup { get; set; }
+        [Required]
+        public bool CanManageUsersRoles { get; set; }
         public virtual ICollection<Membership> Memberships { get; private set; }
-        /* ToDo: Add permissions */
     }
 }
