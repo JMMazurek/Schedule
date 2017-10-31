@@ -45,7 +45,7 @@ namespace Schedule.Controllers
             Notification notification = db.Notifications.Find(id);
             if(notification == null || notification.UserId != userId)
             {
-                //bad request
+                return HttpNotFound();
             }
             notification.Seen = true;
             db.SaveChanges();
@@ -61,7 +61,7 @@ namespace Schedule.Controllers
             Notification notification = db.Notifications.Find(id);
             if (notification == null || notification.UserId != userId)
             {
-                //bad request
+                return HttpNotFound();
             }
             db.Notifications.Remove(notification);
             db.SaveChanges();
@@ -77,7 +77,7 @@ namespace Schedule.Controllers
             Request request = db.Requests.Find(id);
             if (request == null || request.RequestingUserId != userId || request.Status != "Waiting")
             {
-                //bad request
+                return HttpNotFound();
             }
             request.Canceled = true;
             db.SaveChanges();
@@ -93,7 +93,7 @@ namespace Schedule.Controllers
             Request request = db.Requests.Find(id);
             if (request == null || request.RequestingUserId != userId)
             {
-                //bad request
+                return HttpNotFound();
             }
             db.Requests.Remove(request);
             db.SaveChanges();
@@ -109,7 +109,7 @@ namespace Schedule.Controllers
             Invitation invitation = db.Invitations.Find(id);
             if (invitation == null || invitation.InvitedUserId != userId || invitation.Status != "Waiting")
             {
-                //bad request
+                return HttpNotFound();
             }
 
             Membership membership = db.Memberships.Find(userId, invitation.GroupId);
@@ -119,7 +119,7 @@ namespace Schedule.Controllers
                 {
                     UserId = userId,
                     GroupId = invitation.GroupId,
-                    GroupRoleId = 1
+                    GroupRole = db.GroupRoles.Where(gr => gr.Name == "User").First()
                 };
                 db.Memberships.Add(membership);
                 invitation.Accepted = true;
@@ -147,7 +147,7 @@ namespace Schedule.Controllers
             Invitation invitation = db.Invitations.Find(id);
             if (invitation == null || invitation.InvitedUserId != userId || invitation.Status != "Waiting")
             {
-                //bad request
+                return HttpNotFound();
             }
 
             invitation.Rejected = true;
@@ -174,7 +174,7 @@ namespace Schedule.Controllers
             Invitation invitation = db.Invitations.Find(id);
             if (invitation == null || invitation.InvitedUserId != userId)
             {
-                //bad request
+                return HttpNotFound();
             }
 
             if (invitation.Status == "Waiting")

@@ -23,7 +23,7 @@ namespace Schedule.Controllers
             var userID = User.Identity.GetUserId();
             if (group.HasValue)
             {
-                var membership = (from m in db.Memberships
+                Membership membership = (from m in db.Memberships
                                   where m.UserId == userID
                                   && m.GroupId == @group.Value
                                   select m).FirstOrDefault();
@@ -129,6 +129,19 @@ namespace Schedule.Controllers
             var userID = User.Identity.GetUserId();
             DateTime fromDate = DateTime.Now;
             fromDate = new DateTime(year ?? fromDate.Year, month ?? fromDate.Month, day ?? fromDate.Day);
+
+            if (group.HasValue)
+            {
+                Membership membership = (from m in db.Memberships
+                                         where m.UserId == userID
+                                         && m.GroupId == @group.Value
+                                         select m).FirstOrDefault();
+                if (membership == null)
+                {
+                    return HttpNotFound();
+                }
+            }
+
             Event @event = new Event
             {
                 GroupId = group,
@@ -152,6 +165,17 @@ namespace Schedule.Controllers
             var userID = User.Identity.GetUserId();
             if (ModelState.IsValid)
             {
+                if (@event.GroupId.HasValue)
+                {
+                    Membership membership = (from m in db.Memberships
+                                             where m.UserId == userID
+                                             && m.GroupId == @event.GroupId.Value
+                                             select m).FirstOrDefault();
+                    if (membership == null)
+                    {
+                        return HttpNotFound();
+                    }
+                }
                 @event.OwnerId = userID;
                 db.Events.Add(@event);
                 db.SaveChanges();
@@ -176,6 +200,28 @@ namespace Schedule.Controllers
                 return HttpNotFound();
             }
 
+            var userID = User.Identity.GetUserId();
+
+            if (@event.GroupId.HasValue)
+            {
+                Membership membership = (from m in db.Memberships.Include(m => m.GroupRole)
+                                         where m.UserId == userID
+                                         && m.GroupId == @event.GroupId.Value
+                                         select m).FirstOrDefault();
+                if (membership == null)
+                {
+                    return HttpNotFound();
+                }
+
+                if (@event.OwnerId != userID && !membership.GroupRole.CanManageUsersEvents)
+                    return HttpNotFound();
+            }
+            else
+            {
+                if (@event.OwnerId != userID)
+                    return HttpNotFound();
+            }
+
             ViewBag.groupId = @event.GroupId;
 
             return View(@event);
@@ -194,6 +240,28 @@ namespace Schedule.Controllers
                 if(editedEvent == null)
                 {
                     return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+
+                var userID = User.Identity.GetUserId();
+
+                if (@event.GroupId.HasValue)
+                {
+                    Membership membership = (from m in db.Memberships.Include(m => m.GroupRole)
+                                             where m.UserId == userID
+                                             && m.GroupId == @event.GroupId.Value
+                                             select m).FirstOrDefault();
+                    if (membership == null)
+                    {
+                        return HttpNotFound();
+                    }
+
+                    if (@event.OwnerId != userID && !membership.GroupRole.CanManageUsersEvents)
+                        return HttpNotFound();
+                }
+                else
+                {
+                    if (@event.OwnerId != userID)
+                        return HttpNotFound();
                 }
 
                 editedEvent.Starts = @event.Starts;
@@ -223,6 +291,28 @@ namespace Schedule.Controllers
                 return HttpNotFound();
             }
 
+            var userID = User.Identity.GetUserId();
+
+            if (@event.GroupId.HasValue)
+            {
+                Membership membership = (from m in db.Memberships.Include(m => m.GroupRole)
+                                         where m.UserId == userID
+                                         && m.GroupId == @event.GroupId.Value
+                                         select m).FirstOrDefault();
+                if (membership == null)
+                {
+                    return HttpNotFound();
+                }
+
+                if (@event.OwnerId != userID && !membership.GroupRole.CanManageUsersEvents)
+                    return HttpNotFound();
+            }
+            else
+            {
+                if (@event.OwnerId != userID)
+                    return HttpNotFound();
+            }
+
             ViewBag.groupId = @event.GroupId;
 
             return View(@event);
@@ -234,6 +324,29 @@ namespace Schedule.Controllers
         public ActionResult DeleteConfirmed(int id)
         {
             Event @event = db.Events.Find(id);
+
+            var userID = User.Identity.GetUserId();
+
+            if (@event.GroupId.HasValue)
+            {
+                Membership membership = (from m in db.Memberships.Include(m => m.GroupRole)
+                                         where m.UserId == userID
+                                         && m.GroupId == @event.GroupId.Value
+                                         select m).FirstOrDefault();
+                if (membership == null)
+                {
+                    return HttpNotFound();
+                }
+
+                if (@event.OwnerId != userID && !membership.GroupRole.CanManageUsersEvents)
+                    return HttpNotFound();
+            }
+            else
+            {
+                if (@event.OwnerId != userID)
+                    return HttpNotFound();
+            }
+
             db.Events.Remove(@event);
             db.SaveChanges();
             if (!@event.GroupId.HasValue)

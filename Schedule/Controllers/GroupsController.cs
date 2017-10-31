@@ -31,6 +31,7 @@ namespace Schedule.Controllers
         {
             var groups = from g in db.Groups
                          where g.Name.Contains(name)
+                         && g.Searchable
                          select g;
 
             GroupsFindGroupViewModel model = new GroupsFindGroupViewModel
@@ -56,6 +57,8 @@ namespace Schedule.Controllers
             }
             var userId = User.Identity.GetUserId();
             Membership membership = db.Memberships.Find(userId, id.Value);
+            if (membership == null && !group.Searchable)
+                return HttpNotFound();
 
             ViewBag.groupId = id.Value;
 
@@ -95,7 +98,7 @@ namespace Schedule.Controllers
                 Membership membership = new Membership
                 {
                     Group = group,
-                    GroupRoleId = 1,
+                    GroupRole = db.GroupRoles.Where(gr => gr.Name == "Administrator").First(),
                     UserId = userId
                 };
                 db.Memberships.Add(membership);
@@ -118,6 +121,13 @@ namespace Schedule.Controllers
             {
                 return HttpNotFound();
             }
+
+            var userId = User.Identity.GetUserId();
+            Membership membership = db.Memberships.Find(userId, id.Value);
+
+            if (membership == null || !membership.GroupRole.CanManageGroup)
+                return HttpNotFound();
+
             ViewBag.groupId = id.Value;
             return View(group);
         }
@@ -131,6 +141,12 @@ namespace Schedule.Controllers
         {
             if (ModelState.IsValid)
             {
+                var userId = User.Identity.GetUserId();
+                Membership membership = db.Memberships.Find(userId, group.Id);
+
+                if (membership == null || !membership.GroupRole.CanManageGroup)
+                    return HttpNotFound();
+
                 db.Entry(group).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
@@ -151,6 +167,12 @@ namespace Schedule.Controllers
                 return HttpNotFound();
             }
 
+            var userId = User.Identity.GetUserId();
+            Membership membership = db.Memberships.Find(userId, id.Value);
+
+            if (membership == null || !membership.GroupRole.CanManageGroup)
+                return HttpNotFound();
+
             ViewBag.groupId = id.Value;
 
             return View(group);
@@ -161,6 +183,11 @@ namespace Schedule.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
+            var userId = User.Identity.GetUserId();
+            Membership membership = db.Memberships.Find(userId, id);
+
+            if (membership == null || !membership.GroupRole.CanManageGroup)
+                return HttpNotFound();
             Group group = db.Groups.Find(id);
             db.Groups.Remove(group);
             db.SaveChanges();
@@ -245,11 +272,16 @@ namespace Schedule.Controllers
         {
             var userId = User.Identity.GetUserId();
             Models.Request request = db.Requests.Find(id);
-            // check if can accept
+
+            Membership m = db.Memberships.Find(userId, request.GroupId);
+
             if (request == null || request.Status != "Waiting")
             {
-                //bad request
+                return HttpNotFound();
             }
+
+            if (m == null || !m.GroupRole.CanManageUsers)
+                return HttpNotFound();
 
             Membership membership = db.Memberships.Find(request.RequestingUserId, request.GroupId);
             if (membership == null)
@@ -258,7 +290,7 @@ namespace Schedule.Controllers
                 {
                     UserId = request.RequestingUserId,
                     GroupId = request.GroupId,
-                    GroupRoleId = 1
+                    GroupRole = db.GroupRoles.Where(gr => gr.Name == "User").First()
                 };
                 db.Memberships.Add(membership);
                 request.Accepted = true;
@@ -284,11 +316,16 @@ namespace Schedule.Controllers
         {
             var userId = User.Identity.GetUserId();
             Request request = db.Requests.Find(id);
-            // check if can accept
+            
             if (request == null || request.Status != "Waiting")
             {
-                //bad request
+                return HttpNotFound();
             }
+
+            Membership m = db.Memberships.Find(userId, request.GroupId);
+
+            if (m == null || !m.GroupRole.CanManageUsers)
+                return HttpNotFound();
 
             request.Rejected = true;
             string groupName = db.Groups.Find(request.GroupId).Name;
@@ -312,11 +349,17 @@ namespace Schedule.Controllers
         {
             var userId = User.Identity.GetUserId();
             Invitation invitation = db.Invitations.Find(id);
-            // check if can
+            
             if (invitation == null || invitation.Status != "Waiting")
             {
-                //bad request
+                return HttpNotFound();
             }
+
+            Membership m = db.Memberships.Find(userId, invitation.GroupId);
+
+            if (m == null || !m.GroupRole.CanManageUsers)
+                return HttpNotFound();
+
             invitation.Canceled = true;
             db.SaveChanges();
 
@@ -329,9 +372,10 @@ namespace Schedule.Controllers
         {
             var userId = User.Identity.GetUserId();
             Group group = db.Groups.Find(id);
+
             if (group == null || group.NeedConfirmation)
             {
-                //bad request
+                HttpNotFound();
             }
             Membership membership = db.Memberships.Find(userId, id);
             
@@ -341,7 +385,7 @@ namespace Schedule.Controllers
                 {
                     UserId = userId,
                     GroupId = id,
-                    GroupRoleId = 1
+                    GroupRole = db.GroupRoles.Where(gr => gr.Name == "User").First()
                 };
                 db.Memberships.Add(membership);
                 db.SaveChanges();
@@ -356,16 +400,21 @@ namespace Schedule.Controllers
         {
             var currentUserId = User.Identity.GetUserId();
             Group group = db.Groups.Find(groupId);
-            // check if can
+            
             if (group == null)
             {
-                //bad request
+                return HttpNotFound();
             }
             User user = db.Users.Find(userId);
             if (user == null)
             {
-                //bad request
+                return HttpNotFound();
             }
+
+            Membership m = db.Memberships.Find(userId, groupId);
+
+            if (m == null || !m.GroupRole.CanManageUsers)
+                return HttpNotFound();
 
             Membership membership = db.Memberships.Find(userId, groupId);
 
@@ -401,10 +450,10 @@ namespace Schedule.Controllers
         {
             var userId = User.Identity.GetUserId();
             Group group = db.Groups.Find(id);
-            // check if can
-            if (group == null || !group.NeedConfirmation)
+ 
+            if (group == null || !group.NeedConfirmation || !group.Searchable)
             {
-                //bad request
+                return HttpNotFound();
             }
             Membership membership = db.Memberships.Find(userId, id);
 
@@ -430,16 +479,16 @@ namespace Schedule.Controllers
         {
             var userId = User.Identity.GetUserId();
             Group group = db.Groups.Find(id);
-            // check if can
+            
             if (group == null)
             {
-                //bad request
+                return HttpNotFound();
             }
             Membership membership = db.Memberships.Find(userId, id);
 
             if (membership == null)
             {
-                //bad request
+                return HttpNotFound();
             }
 
             db.Memberships.Remove(membership);
@@ -452,7 +501,7 @@ namespace Schedule.Controllers
         {
             if(!groupId.HasValue)
             {
-                // bad request
+                return HttpNotFound();
             }
             var users = from u in db.Users
                         let gs = from m in u.Memberships
@@ -471,6 +520,49 @@ namespace Schedule.Controllers
             ViewBag.groupId = groupId.Value;
 
             return View(model);
+        }
+
+        public ActionResult GroupMembers(int? groupId)
+        {
+            if (!groupId.HasValue)
+            {
+                return HttpNotFound();
+            }
+
+            var userId = User.Identity.GetUserId();
+            Group group = db.Groups.Find(groupId);
+
+            if (group == null)
+            {
+                return HttpNotFound();
+            }
+
+            Membership membership = db.Memberships.Find(userId, groupId.Value);
+
+            if (membership == null)
+            {
+                return HttpNotFound();
+            }
+
+            ViewBag.groupId = groupId.Value;
+
+            var memberships = group.Memberships.ToList();
+
+            return View(memberships);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteMembership()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditMembership()
+        {
+            return View();
         }
 
         protected override void Dispose(bool disposing)
