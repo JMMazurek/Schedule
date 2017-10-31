@@ -23,9 +23,10 @@ Done:
 - groups logic
 - notifications, requests and invitations logic
 - view templates
+- checking permissions
 
 To do:
-- checking permissions
-- group roles
+- Fluent API cascade delete
+- manage group members
 - view improvement
 
