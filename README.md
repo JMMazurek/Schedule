@@ -22,11 +22,10 @@ Done:
 - events logic
 - groups logic
 - notifications, requests and invitations logic
+- group members managment
 - view templates
 - checking permissions
 
 To do:
 - Fluent API cascade delete
-- manage group members
 - view improvement
-
