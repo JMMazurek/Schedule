@@ -430,6 +430,7 @@
     <Content Include="Views\Groups\RequestsAndInvitations.cshtml" />
     <Content Include="Views\Groups\FindUser.cshtml" />
     <Content Include="Views\Groups\FindGroup.cshtml" />
+    <Content Include="Views\Groups\Members.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

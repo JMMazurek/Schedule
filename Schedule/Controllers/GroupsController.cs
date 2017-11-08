@@ -411,7 +411,7 @@ namespace Schedule.Controllers
                 return HttpNotFound();
             }
 
-            Membership m = db.Memberships.Find(userId, groupId);
+            Membership m = db.Memberships.Find(currentUserId, groupId);
 
             if (m == null || !m.GroupRole.CanManageUsers)
                 return HttpNotFound();
@@ -522,7 +522,7 @@ namespace Schedule.Controllers
             return View(model);
         }
 
-        public ActionResult GroupMembers(int? groupId)
+        public ActionResult Members(int? groupId)
         {
             if (!groupId.HasValue)
             {
@@ -546,6 +546,15 @@ namespace Schedule.Controllers
 
             ViewBag.groupId = groupId.Value;
 
+            var options = from gr in db.GroupRoles
+                           select new SelectListItem
+                           {
+                               Value = gr.Id.ToString(),
+                               Text = gr.Name
+                           };
+
+            ViewBag.options = options;
+
             var memberships = group.Memberships.ToList();
 
             return View(memberships);
@@ -553,16 +562,56 @@ namespace Schedule.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult DeleteMembership()
+        public ActionResult RemoveMember(int? groupId, string userId)
         {
-            return View();
+            if (!groupId.HasValue || String.IsNullOrEmpty(userId))
+            {
+                return HttpNotFound();
+            }
+
+            var currentUserId = User.Identity.GetUserId();
+            Group group = db.Groups.Find(groupId);
+
+            if (group == null)
+            {
+                return HttpNotFound();
+            }
+
+            Membership membership = db.Memberships.Find(userId, groupId.Value);
+            Membership currentUserMembership = db.Memberships.Find(currentUserId, groupId.Value);
+
+            if (membership == null || currentUserMembership == null || !currentUserMembership.GroupRole.CanManageUsersRoles)
+            {
+                return HttpNotFound();
+            }
+
+            db.Memberships.Remove(membership);
+            db.SaveChanges();
+
+            return RedirectToAction("Members", new { groupId = groupId});
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EditMembership()
+        public ActionResult EditMembership([Bind(Include = "UserId,GroupId,GroupRoleId")] Membership membership)
         {
-            return View();
+            if (ModelState.IsValid)
+            {
+                var currentUserId = User.Identity.GetUserId();
+                Membership m = db.Memberships.Find(membership.UserId, membership.GroupId);
+
+                Membership currentUserMembership = db.Memberships.Find(currentUserId, membership.GroupId);
+
+                if (m == null || currentUserMembership == null || !currentUserMembership.GroupRole.CanManageUsersRoles)
+                {
+                    return HttpNotFound();
+                }
+
+                m.GroupRoleId = membership.GroupRoleId;
+                db.SaveChanges();
+            }
+
+            return RedirectToAction("Members", new { groupId = membership.GroupId });
         }
 
         protected override void Dispose(bool disposing)

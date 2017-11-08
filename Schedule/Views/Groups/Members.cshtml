@@ -1,0 +1,53 @@
+﻿@model IEnumerable<Schedule.Models.Membership>
+
+@{
+    ViewBag.Title = "Members";
+}
+
+<h2>Members</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.User.UserName)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.GroupRole.Name)
+        </th>
+        <th></th>
+    </tr>
+
+@foreach (var item in Model) {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.User.UserName)
+        </td>
+        <td>
+            @using (Html.BeginForm("EditMembership", "Groups", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-horizontal">
+                    @Html.Hidden("GroupId", item.GroupId)
+                    @Html.Hidden("UserId", item.UserId)
+                    @Html.DropDownList("GroupRoleId", new SelectList(ViewBag.options, "Value", "Text", item.GroupRoleId.ToString()))
+                    <input type="submit" value="Save" class="btn btn-default" />
+                </div>
+            }
+        </td>
+        <td>
+            @using (Html.BeginForm("RemoveMember", "Groups", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="form-actions no-color">
+                    @Html.Hidden("GroupId", item.GroupId)
+                    @Html.Hidden("UserId", item.UserId)
+                    <input type="submit" value="Remove" class="btn btn-danger" />
+                </div>
+            }
+        </td>
+    </tr>
+}
+
+</table>
